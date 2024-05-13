@@ -13,7 +13,7 @@ def get_config(config_path: str, config_name: str) -> dict:
 
 class SnowflakeDatabase:
     def __init__(
-        self, config_path: str = ".\configs", config_name: str = "whse_config.ini"
+        self, config_path: str = "configs", config_name: str = "whse_config.ini"
     ):
         self.config = get_config(config_path, config_name)
         self.conn = self.connection()
