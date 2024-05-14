@@ -67,10 +67,11 @@ def get_countries(df_imdb_id: pd.DataFrame) -> None:
             table_start_index = 0
             csv_file_name = BOMOJO_MOVIES_AREAS_FILE
 
-        for table in tables[table_start_index:]:
-            df_movie_areas = table_to_dataframe(table)
-            df_movie_areas["IMDB_ID"] = imdb_id
-            append_to_csv(df_movie_areas, csv_file_name)
+        if len(tables) > 1:
+            for table in tables[table_start_index:]:
+                df_movie_areas = table_to_dataframe(table)
+                df_movie_areas["IMDB_ID"] = imdb_id
+                append_to_csv(df_movie_areas, csv_file_name)
 
         remaining_ids = total_ids - index
         logging.info(f"Processed IMDb ID {imdb_id}. Remaining IDs: {remaining_ids}")
