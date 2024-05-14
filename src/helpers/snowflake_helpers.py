@@ -1,3 +1,4 @@
+import os
 import logging
 import configparser
 import pandas as pd
@@ -6,7 +7,7 @@ import snowflake.connector
 
 def get_config(config_path: str, config_name: str) -> dict:
     config = configparser.ConfigParser()
-    config.read(f"{config_path}\{config_name}")
+    config.read(os.path.join(config_path, config_name))
 
     return config["snowflake"]
 
