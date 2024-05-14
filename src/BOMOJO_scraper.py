@@ -9,7 +9,7 @@ from helpers.snowflake_helpers import SnowflakeDatabase
 from helpers.web_scraping_helpers import table_to_dataframe
 
 # Constants
-DATA_DIR = os.path.join(".", "data")
+DATA_DIR = os.path.join(".", "data", "raw")
 BOMOJO_MOVIES_RELEASES_FILE = os.path.join(DATA_DIR, "BOMOJO_MOVIES_RELEASES.csv")
 BOMOJO_MOVIES_REGIONS_FILE = os.path.join(DATA_DIR, "BOMOJO_MOVIES_REGIONS.csv")
 BOMOJO_MOVIES_AREAS_FILE = os.path.join(DATA_DIR, "BOMOJO_MOVIES_AREAS.csv")
@@ -38,10 +38,10 @@ def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
 def append_to_csv(df: pd.DataFrame, csv_file: str) -> None:
     try:
         if not os.path.exists(csv_file):
-            df.to_csv(csv_file, index=False)
+            df.to_csv(csv_file, encoding= "utf-8", index=False)
         else:
             with open(csv_file, "a", newline="") as file:
-                df.to_csv(file, index=False, header=False)
+                df.to_csv(file, encoding= "utf-8", index=False, header=False)
     except IOError as e:
         logging.error(f"Error writing to CSV file {csv_file}: {e}")
 
