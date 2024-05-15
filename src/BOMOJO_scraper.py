@@ -29,8 +29,7 @@ def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
         logging.error(f"Error fetching data from {url}: {e}")
         return None
 
-    content = req.text
-    soup = BeautifulSoup(content, "html.parser")
+    soup = BeautifulSoup(req.text, "html.parser")
     tables = soup.find_all("table")
     return tables
 
@@ -38,10 +37,10 @@ def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
 def append_to_csv(df: pd.DataFrame, csv_file: str) -> None:
     try:
         if not os.path.exists(csv_file):
-            df.to_csv(csv_file, encoding= "utf-8", index=False)
+            df.to_csv(csv_file, encoding="utf-8", index=False)
         else:
             with open(csv_file, "a", newline="") as file:
-                df.to_csv(file, encoding= "utf-8", index=False, header=False)
+                df.to_csv(file, encoding="utf-8", index=False, header=False)
     except IOError as e:
         logging.error(f"Error writing to CSV file {csv_file}: {e}")
 
@@ -54,6 +53,7 @@ def get_countries(df_imdb_id: pd.DataFrame) -> None:
         if not tables:
             continue
 
+        # If the movie have more than one release the information is showed with a different structure
         if len(tables) > 1 and tables[1].find_previous_sibling(
             "h3", string="By Release"
         ):
@@ -78,6 +78,10 @@ def get_countries(df_imdb_id: pd.DataFrame) -> None:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: script.py <option>")
+        sys.exit(1)
+
     option = sys.argv[1]
 
     # Set up logging
@@ -88,22 +92,28 @@ if __name__ == "__main__":
         level=logging.INFO,
     )
 
-    db = SnowflakeDatabase(os.path.join(".", "src", "configs"))
+    try:
+        db = SnowflakeDatabase(os.path.join(".", "src", "configs"))
 
-    df_imdb_id = db.execute_query(
-        """
-        SELECT 
-            OMDB.IMDB_ID,
-            OMDB.TITLE
-        FROM
-            MOVIE_CHALLENGE.PUBLIC.OMDB_MOVIES OMDB
-        WHERE 
-            OMDB.BOX_OFFICE IS NOT NULL
-        """
-    )
+        df_imdb_id = db.execute_query(
+            """
+            SELECT 
+                OMDB.IMDB_ID,
+                OMDB.TITLE
+            FROM
+                MOVIE_CHALLENGE.PUBLIC.OMDB_MOVIES OMDB
+            WHERE 
+                OMDB.BOX_OFFICE IS NOT NULL
+            """
+        )
 
-    if option == "countries":
-        get_countries(df_imdb_id)
+        if option == "countries":
+            get_countries(df_imdb_id)
+        else:
+            logging.error(f"Unknown option: {option}")
 
-    db.close_connection()
-    logging.info("Database connection closed. The script has ended.")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+    finally:
+        db.close_connection()
+        logging.info("Database connection closed. The script has ended.")
