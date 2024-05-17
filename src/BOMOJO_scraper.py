@@ -7,12 +7,11 @@ from bs4 import BeautifulSoup
 from typing import List, Optional
 from helpers.snowflake_helpers import SnowflakeDatabase
 from helpers.web_scraping_helpers import table_to_dataframe
-
-# Constants
-DATA_DIR = os.path.join(".", "data", "raw")
-BOMOJO_MOVIES_RELEASES_FILE = os.path.join(DATA_DIR, "BOMOJO_MOVIES_RELEASES.csv")
-BOMOJO_MOVIES_REGIONS_FILE = os.path.join(DATA_DIR, "BOMOJO_MOVIES_REGIONS.csv")
-BOMOJO_MOVIES_AREAS_FILE = os.path.join(DATA_DIR, "BOMOJO_MOVIES_AREAS.csv")
+from helpers.path_helpers import (
+    BOMOJO_MOVIES_AREAS_FILE,
+    BOMOJO_MOVIES_REGIONS_FILE,
+    BOMOJO_MOVIES_RELEASES_FILE,
+)
 
 
 def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
