@@ -1,16 +1,16 @@
-import os
 import sys
 import logging
 import requests
 import pandas as pd
+from pathlib import Path
 from bs4 import BeautifulSoup
 from typing import List, Optional
 from helpers.snowflake_helpers import SnowflakeDatabase
 from helpers.web_scraping_helpers import table_to_dataframe
 from helpers.path_helpers import (
-    BOMOJO_MOVIES_AREAS_FILE,
-    BOMOJO_MOVIES_REGIONS_FILE,
-    BOMOJO_MOVIES_RELEASES_FILE,
+    RAW_BOMOJO_MOVIES_AREAS_FILE,
+    RAW_BOMOJO_MOVIES_REGIONS_FILE,
+    RAW_BOMOJO_MOVIES_RELEASES_FILE,
 )
 
 
@@ -35,7 +35,7 @@ def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
 
 def append_to_csv(df: pd.DataFrame, csv_file: str) -> None:
     try:
-        if not os.path.exists(csv_file):
+        if not Path(csv_file).exists():
             df.to_csv(csv_file, encoding="utf-8", index=False)
         else:
             with open(csv_file, "a", newline="") as file:
@@ -58,13 +58,13 @@ def get_countries(df_imdb_id: pd.DataFrame) -> None:
         ):
             df_movie_releases = table_to_dataframe(tables[0])
             df_movie_releases["IMDB_ID"] = imdb_id
-            append_to_csv(df_movie_releases, BOMOJO_MOVIES_RELEASES_FILE)
+            append_to_csv(df_movie_releases, RAW_BOMOJO_MOVIES_RELEASES_FILE)
 
             table_start_index = 1
-            csv_file_name = BOMOJO_MOVIES_REGIONS_FILE
+            csv_file_name = RAW_BOMOJO_MOVIES_REGIONS_FILE
         else:
             table_start_index = 0
-            csv_file_name = BOMOJO_MOVIES_AREAS_FILE
+            csv_file_name = RAW_BOMOJO_MOVIES_AREAS_FILE
 
         if len(tables) > 1:
             for table in tables[table_start_index:]:
@@ -76,7 +76,7 @@ def get_countries(df_imdb_id: pd.DataFrame) -> None:
         logging.info(f"Processed IMDb ID {imdb_id}. Remaining IDs: {remaining_ids}")
 
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) < 2:
         print("Usage: script.py <option>")
         sys.exit(1)
@@ -85,14 +85,16 @@ if __name__ == "__main__":
 
     # Set up logging
     logging.basicConfig(
-        filename=f"{option}.log",
+        filename=f"scraper_{option}.log",
         filemode="w",
         format="%(name)s - %(levelname)s - %(message)s",
         level=logging.INFO,
     )
 
+    logging.info("Script started with option: %s", option)
+
     try:
-        db = SnowflakeDatabase(os.path.join(".", "src", "configs"))
+        db = SnowflakeDatabase(Path(".", "src", "configs"))
 
         df_imdb_id = db.execute_query(
             """
@@ -116,3 +118,7 @@ if __name__ == "__main__":
     finally:
         db.close_connection()
         logging.info("Database connection closed. The script has ended.")
+
+
+if __name__ == "__main__":
+    main()
