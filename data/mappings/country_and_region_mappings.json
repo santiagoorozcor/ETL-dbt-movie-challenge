@@ -1,0 +1,47 @@
+{
+    "country_mapping": {
+      "Russia/CIS": "Russia",
+      "Soviet Union": "Russia",
+      "Reunion": "France",
+      "New Caledonia": "France",
+      "Switzerland (French/Italian)": "Switzerland",
+      "Switzerland (German)": "Switzerland",
+      "Switzerland (French)": "Switzerland",
+      "Switzerland (Italian)": "Switzerland",
+      "Central America+": "Central America",
+      "Yugoslavia": "Serbia and Montenegro",
+      "North Macedonia": "Macedonia",
+      "Bosnia": "Bosnia and Herzegovina"
+    },
+    "market_regions": {
+      "DOMESTIC": ["Domestic", "Canada"],
+      "CHINA": ["China"],
+      "LATAM": [
+        "Mexico", "Colombia", "Puerto Rico", "Argentina", "Ecuador", "Venezuela",
+        "Chile", "Peru", "Bolivia", "Nicaragua", "Uruguay", "Dominican Republic",
+        "Costa Rica", "Guatemala", "Paraguay", "Panama", "El Salvador", "Honduras",
+        "Brazil", "Trinidad & Tobago", "Jamaica", "Lesser Antilles", "Curaçao",
+        "Aruba", "Belize", "Central America", "West Indies"
+      ],
+      "EMEA": [
+        "United Kingdom", "France", "Czech Republic", "Slovakia", "Portugal", "Russia",
+        "Italy", "Turkey", "Ukraine", "Germany", "Spain", "Netherlands", "Poland",
+        "Norway", "Romania", "Hungary", "Lithuania", "Bulgaria", "Slovenia",
+        "Serbia and Montenegro", "Iceland", "Croatia", "Ireland", "Belgium", "Denmark",
+        "Austria", "Switzerland", "Sweden", "Finland", "Greece", "Israel", "Latvia",
+        "Estonia", "Bosnia and Herzegovina", "Macedonia", "Albania", "Baltic States",
+        "Greece and Cyprus", "Netherlands Antilles", "Tunisia", "Morocco", "South Africa",
+        "Nigeria", "Ghana", "Kenya", "Bahrain", "Qatar", "Egypt", "Jordan", "Oman",
+        "Ethiopia", "Saudi Arabia", "Kuwait", "Cyprus", "Malta", "Syria", "Lebanon",
+        "United Arab Emirates", "Mauritius", "Palestine", "E/W Africa", "S/E/W Africa",
+        "East Africa", "Middle East Other", "Czech Republic/Slovakia", 
+        "Lebanon/United Arab Emirates", "South Africa/Nigeria", "Middle East", 
+        "Middle East/UAE", "Iraq", "Russia/CIS/Ukraine", "Djibouti"
+      ],
+      "APAC": [
+        "Australia", "New Zealand", "Japan", "Singapore", "Hong Kong", "South Korea",
+        "Taiwan", "Philippines", "Thailand", "Malaysia", "Indonesia", "India", "Pakistan",
+        "Sri Lanka", "Vietnam", "Cambodia", "Mongolia", "Bangladesh", "Laos"
+      ]
+    }
+}

@@ -11,6 +11,7 @@ snowflake-connector-python = "^3.10.0"
 pandas = "^2.2.2"
 requests = "^2.31.0"
 beautifulsoup4 = "^4.12.3"
+pyarrow = "^16.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
