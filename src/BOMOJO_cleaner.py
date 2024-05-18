@@ -1,12 +1,14 @@
 import sys
 import json
 import logging
+import numpy as np
 import pandas as pd
 from helpers import (
     RAW_BOMOJO_MOVIES_AREAS_FILE,
     RAW_BOMOJO_MOVIES_REGIONS_FILE,
     RAW_BOMOJO_MOVIES_RELEASES_FILE,
     PRO_BOMOJO_COUNTRIES_FILE,
+    PRO_BOMOJO_RELEASES_FILE,
     COUNTRY_REGION_MAPPINGS,
 )
 
@@ -46,7 +48,15 @@ def classify_region(
     return df
 
 
-def process_countries(country_mapping: dict, market_regions: dict):
+def convert_currency_to_int(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
+    df[column_name] = (
+        df[column_name].str.replace(r"[\$,]", "", regex=True).astype(np.int64)
+    )
+
+    return df
+
+
+def process_countries(country_mapping: dict, market_regions: dict) -> None:
     try:
         df_areas = pd.read_csv(
             RAW_BOMOJO_MOVIES_AREAS_FILE,
@@ -93,6 +103,34 @@ def process_countries(country_mapping: dict, market_regions: dict):
         logging.error("An error occurred during data processing: %s", str(e))
 
 
+def process_releases(country_mapping: dict) -> None:
+    try:
+        df_releases = pd.read_csv(
+            RAW_BOMOJO_MOVIES_RELEASES_FILE, encoding="utf-8"
+        ).rename(columns={"Release Group": "RELEASE_GROUP"})
+
+        df_releases.columns = df_releases.columns.str.upper()
+
+        df_releases = (
+            df_releases.replace(["â€“", "–"], "0")
+            .pipe(convert_currency_to_int, "DOMESTIC")
+            .pipe(convert_currency_to_int, "INTERNATIONAL")
+            .pipe(convert_currency_to_int, "WORLDWIDE")
+        )
+
+        df_releases = normalize_country_names(df_releases, "MARKETS", country_mapping)
+
+        logging.info("Data processing complete. Saving to file...")
+
+        df_releases.to_parquet(PRO_BOMOJO_RELEASES_FILE, index=False)
+        logging.info(
+            "Data successfully processed and saved to %s", PRO_BOMOJO_RELEASES_FILE
+        )
+
+    except Exception as e:
+        logging.error("An error occurred during data processing: %s", str(e))
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: script.py <option>")
@@ -115,6 +153,8 @@ def main():
 
         if option == "countries":
             process_countries(country_mapping, market_regions)
+        elif option == "releases":
+            process_releases(country_mapping)
         else:
             logging.error("Invalid option provided: %s", option)
             sys.exit(1)
