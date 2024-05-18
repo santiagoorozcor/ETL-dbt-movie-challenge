@@ -1,9 +1,11 @@
+import os
 import sys
 import logging
 import requests
 import pandas as pd
 from pathlib import Path
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from typing import List, Optional
 from helpers.snowflake_helpers import SnowflakeDatabase
 from helpers.web_scraping_helpers import table_to_dataframe
@@ -12,6 +14,8 @@ from helpers import (
     RAW_BOMOJO_MOVIES_REGIONS_FILE,
     RAW_BOMOJO_MOVIES_RELEASES_FILE,
 )
+
+load_dotenv()
 
 
 def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
@@ -94,7 +98,7 @@ def main():
     logging.info("Script started with option: %s", option)
 
     try:
-        db = SnowflakeDatabase(Path(".", "src", "configs"))
+        db = SnowflakeDatabase()
 
         df_imdb_id = db.execute_query(
             """

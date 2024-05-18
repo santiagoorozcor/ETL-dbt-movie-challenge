@@ -1,39 +1,33 @@
 import os
 import logging
-import configparser
 import pandas as pd
 import snowflake.connector
-from typing import Optional, Dict
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 
 
-def get_config(config_path: str, config_name: str) -> Dict[str, str]:
-    config = configparser.ConfigParser()
-    config.read(os.path.join(config_path, config_name))
-
-    if "snowflake" not in config:
-        logging.error("Configuration section 'snowflake' not found in config file.")
-        raise ValueError("Configuration section 'snowflake' not found in config file.")
-
-    return config["snowflake"]
-
-
+@dataclass
 class SnowflakeDatabase:
-    def __init__(
-        self, config_path: str = "configs", config_name: str = "whse_config.ini"
-    ):
-        self.config = get_config(config_path, config_name)
+    user: str
+    password: str
+    account: str
+    warehouse: str
+    database: str
+    schema: str
+    conn: any = field(init=False)
+
+    def __post_init__(self):
         self.conn = self._connect()
 
     def _connect(self):
         try:
             conn = snowflake.connector.connect(
-                user=self.config["USER"],
-                password=self.config["PASSWORD"],
-                account=self.config["ACCOUNT"],
-                warehouse=self.config["WAREHOUSE"],
-                database=self.config["DATABASE"],
-                schema=self.config["SCHEMA"],
+                user=self.user,
+                password=self.password,
+                account=self.account,
+                warehouse=self.warehouse,
+                database=self.database,
+                schema=self.schema,
             )
             logging.info("Successfully connected to the Snowflake database.")
             return conn
