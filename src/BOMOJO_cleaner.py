@@ -2,7 +2,7 @@ import sys
 import json
 import logging
 import pandas as pd
-from helpers.path_helpers import (
+from helpers import (
     RAW_BOMOJO_MOVIES_AREAS_FILE,
     RAW_BOMOJO_MOVIES_REGIONS_FILE,
     RAW_BOMOJO_MOVIES_RELEASES_FILE,

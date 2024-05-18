@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from typing import List, Optional
 from helpers.snowflake_helpers import SnowflakeDatabase
 from helpers.web_scraping_helpers import table_to_dataframe
-from helpers.path_helpers import (
+from helpers import (
     RAW_BOMOJO_MOVIES_AREAS_FILE,
     RAW_BOMOJO_MOVIES_REGIONS_FILE,
     RAW_BOMOJO_MOVIES_RELEASES_FILE,
