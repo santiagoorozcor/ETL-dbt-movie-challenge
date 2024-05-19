@@ -8,11 +8,13 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from typing import List, Optional
 from helpers.snowflake_helpers import SnowflakeDatabase
-from helpers.web_scraping_helpers import table_to_dataframe
+from helpers.web_scraping_helpers import table_to_dataframe, get_href_table
 from helpers import (
     RAW_BOMOJO_MOVIES_AREAS_FILE,
     RAW_BOMOJO_MOVIES_REGIONS_FILE,
     RAW_BOMOJO_MOVIES_RELEASES_FILE,
+    RAW_BOMOJO_FRANCHISES_FILE,
+    RAW_BOMOJO_BRANDS_FILE,
 )
 
 load_dotenv()
@@ -22,7 +24,7 @@ def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
     logging.info(f"Fetching data from {url}")
     try:
         req = requests.get(url)
-        req.raise_for_status()  # Raise HTTPError for bad requests
+        req.raise_for_status()
 
     except (
         requests.exceptions.RequestException,
@@ -35,6 +37,71 @@ def fetch_movie_data(url: str) -> Optional[List[BeautifulSoup]]:
     soup = BeautifulSoup(req.text, "html.parser")
     tables = soup.find_all("table")
     return tables
+
+
+def scrape_imdb_ids(
+    df_data: pd.DataFrame, url_column: str, entity_column: str, key_work: str
+) -> pd.DataFrame:
+    """
+    In the first loop, it retrieves all the links to movies associated with each entity.
+    In the second loop, it makes requests to each movie URL to extract the IMDb ID.
+    """
+    imdb_data = []
+
+    for url, entity_name in zip(df_data[url_column], df_data[entity_column]):
+        logging.info("Processing: %s", entity_name)
+
+        total_movies = 0
+        total_movies_found = 0
+
+        try:
+            req = requests.get(url)
+            soup = BeautifulSoup(req.text, "html.parser")
+
+            df_movies = get_href_table(soup, key_work)
+            df_movies["href"] = df_movies["href"].apply(
+                lambda href: f"https://www.boxofficemojo.com{href}"
+            )
+            total_movies += len(df_movies)
+
+            for movie_url in df_movies["href"]:
+                logging.info("Scraping movie URL: %s", movie_url)
+
+                try:
+                    req_movie = requests.get(movie_url)
+                    req_movie.raise_for_status()
+
+                    soup_movie = BeautifulSoup(req_movie.text, "html.parser")
+                    first_pro_imdb_link = soup_movie.find(
+                        "a",
+                        href=lambda href: href and "https://pro.imdb.com/title" in href,
+                    )
+
+                    if first_pro_imdb_link:
+                        imdb_id = (
+                            str(first_pro_imdb_link).split("/title/")[-1].split("/")[0]
+                        )
+                        total_movies_found += 1
+                    else:
+                        imdb_id = None
+
+                    imdb_data.append({"Entity": entity_name, "IMDB_ID": imdb_id})
+
+                except requests.exceptions.RequestException as e:
+                    logging.error(
+                        "Error occurred while scraping movie URL %s: %s",
+                        movie_url,
+                        str(e),
+                    )
+                    continue
+
+            logging.info("Total movies found: %d/%d", total_movies_found, total_movies)
+
+        except requests.exceptions.RequestException as e:
+            logging.error("Error occurred while processing URL %s: %s", url, str(e))
+            continue
+
+    return pd.DataFrame(imdb_data)
 
 
 def append_to_csv(df: pd.DataFrame, csv_file: str) -> None:
@@ -80,6 +147,21 @@ def get_countries(df_imdb_id: pd.DataFrame) -> None:
         logging.info(f"Processed IMDb ID {imdb_id}. Remaining IDs: {remaining_ids}")
 
 
+def get_franchises() -> None:
+    url = "https://www.boxofficemojo.com/franchise/?ref_=bo_nb_gs_secondarytab"
+    req = requests.get(url)
+    soup = BeautifulSoup(req.text, "html.parser")
+
+    df_franchises = get_href_table(soup, "franchise/fr")
+    df_franchises["href"] = df_franchises["href"].apply(
+        lambda href: f"https://www.boxofficemojo.com{href}"
+    )
+
+    df_franchises_imdb_id = scrape_imdb_ids(df_franchises, "href", "Name", "release/rl")
+
+    append_to_csv(df_franchises_imdb_id, RAW_BOMOJO_FRANCHISES_FILE)
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: script.py <option>")
@@ -98,7 +180,14 @@ def main():
     logging.info("Script started with option: %s", option)
 
     try:
-        db = SnowflakeDatabase()
+        db = SnowflakeDatabase(
+            os.getenv("USER"),
+            os.getenv("PASSWORD"),
+            os.getenv("ACCOUNT"),
+            os.getenv("WAREHOUSE"),
+            os.getenv("DATABASE"),
+            os.getenv("SCHEMA"),
+        )
 
         df_imdb_id = db.execute_query(
             """
@@ -114,6 +203,10 @@ def main():
 
         if option == "countries":
             get_countries(df_imdb_id)
+        elif option == "franchises":
+            get_franchises()
+        elif option == "brands":
+            ...
         else:
             logging.error(f"Unknown option: {option}")
 
