@@ -196,29 +196,37 @@ def main():
     logging.info("Script started with option: %s", option)
 
     try:
-        db = SnowflakeDatabase(
-            os.getenv("USER"),
-            os.getenv("PASSWORD"),
-            os.getenv("ACCOUNT"),
-            os.getenv("WAREHOUSE"),
-            os.getenv("DATABASE"),
-            os.getenv("SCHEMA"),
-        )
-
-        df_imdb_id = db.execute_query(
-            """
-            SELECT 
-                OMDB.IMDB_ID,
-                OMDB.TITLE
-            FROM
-                MOVIE_CHALLENGE.PUBLIC.OMDB_MOVIES OMDB
-            WHERE 
-                OMDB.BOX_OFFICE IS NOT NULL
-            """
-        )
-
         if option == "countries":
-            get_countries(df_imdb_id)
+            try:
+                db = SnowflakeDatabase(
+                    os.getenv("USER"),
+                    os.getenv("PASSWORD"),
+                    os.getenv("ACCOUNT"),
+                    os.getenv("WAREHOUSE"),
+                    os.getenv("DATABASE"),
+                    os.getenv("SCHEMA"),
+                )
+
+                df_imdb_id = db.execute_query(
+                    """
+                    SELECT 
+                        OMDB.IMDB_ID,
+                        OMDB.TITLE
+                    FROM
+                        MOVIE_CHALLENGE.PUBLIC.OMDB_MOVIES OMDB
+                    WHERE 
+                        OMDB.BOX_OFFICE IS NOT NULL
+                    """
+                )
+
+                get_countries(df_imdb_id)
+
+            except Exception as e:
+                logging.error(f"An error occurred: {e}")
+            finally:
+                db.close_connection()
+                logging.info("Database connection closed. The script has ended.")
+
         elif option == "franchises":
             get_franchises()
         elif option == "brands":
@@ -229,8 +237,7 @@ def main():
     except Exception as e:
         logging.error(f"An error occurred: {e}")
     finally:
-        db.close_connection()
-        logging.info("Database connection closed. The script has ended.")
+        logging.info("The process has been completed.")
 
 
 if __name__ == "__main__":
