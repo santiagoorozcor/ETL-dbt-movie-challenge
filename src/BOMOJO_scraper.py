@@ -162,6 +162,22 @@ def get_franchises() -> None:
     append_to_csv(df_franchises_imdb_id, RAW_BOMOJO_FRANCHISES_FILE)
 
 
+def get_brands() -> None:
+    url = "https://www.boxofficemojo.com/brand/?ref_=bo_nb_frs_secondarytab"
+    req = requests.get(url)
+    soup = BeautifulSoup(req.text, "html.parser")
+
+    df_brands = get_href_table(soup, "brand/bn")
+    df_brands["href"] = df_brands["href"].apply(
+        lambda href: f"https://www.boxofficemojo.com{href}"
+    )
+    df_brands
+
+    df_brands_imdb_id = scrape_imdb_ids(df_brands, "href", "Name", "release/rl")
+
+    append_to_csv(df_brands_imdb_id, RAW_BOMOJO_BRANDS_FILE)
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: script.py <option>")
@@ -206,7 +222,7 @@ def main():
         elif option == "franchises":
             get_franchises()
         elif option == "brands":
-            ...
+            get_brands()
         else:
             logging.error(f"Unknown option: {option}")
 
