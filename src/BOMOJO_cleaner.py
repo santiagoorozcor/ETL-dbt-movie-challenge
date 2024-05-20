@@ -8,9 +8,11 @@ from helpers import (
     RAW_BOMOJO_MOVIES_REGIONS_FILE,
     RAW_BOMOJO_MOVIES_RELEASES_FILE,
     RAW_BOMOJO_FRANCHISES_FILE,
+    RAW_BOMOJO_BRANDS_FILE,
     PRO_BOMOJO_COUNTRIES_FILE,
     PRO_BOMOJO_RELEASES_FILE,
     PRO_BOMOJO_FRANCHISES_FILE,
+    PRO_BOMOJO_BRANDS_FILE,
     COUNTRY_REGION_MAPPINGS,
 )
 
@@ -150,6 +152,23 @@ def process_franchises() -> None:
         logging.error("An error occurred during data processing: %s", str(e))
 
 
+def process_brands() -> None:
+    try:
+        df_brands = pd.read_csv(RAW_BOMOJO_BRANDS_FILE, encoding="utf-8").rename(
+            columns={"Entity": "BRAND"}
+        )
+
+        logging.info("Data processing complete. Saving to file...")
+
+        df_brands.to_parquet(PRO_BOMOJO_BRANDS_FILE, index=False)
+        logging.info(
+            "Data successfully processed and saved to %s", PRO_BOMOJO_BRANDS_FILE
+        )
+
+    except Exception as e:
+        logging.error("An error occurred during data processing: %s", str(e))
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: script.py <option>")
@@ -176,6 +195,8 @@ def main():
             process_releases(country_mapping)
         elif option == "franchises":
             process_franchises()
+        elif option == "brands":
+            process_brands()
         else:
             logging.error("Invalid option provided: %s", option)
             sys.exit(1)
