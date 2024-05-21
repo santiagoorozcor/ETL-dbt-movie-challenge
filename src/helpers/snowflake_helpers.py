@@ -64,6 +64,19 @@ class SnowflakeDatabase:
             logging.error(f"Failed to execute query: {e}")
             raise
 
+    def load_data(self, df: pd.DataFrame, table_name: str) -> None:
+        try:
+            with self.managed_cursor() as cur:
+                cur.executemany(
+                    f"INSERT INTO {table_name} VALUES ({','.join(['%s'] * len(df.columns))})",
+                    df.values.tolist(),
+                )
+                cur.execute("COMMIT")
+            logging.info("Data loaded successfully.")
+        except Exception as e:
+            logging.error(f"Failed to load data into {table_name}: {e}")
+            raise
+
     def close_connection(self):
         try:
             self.conn.close()
