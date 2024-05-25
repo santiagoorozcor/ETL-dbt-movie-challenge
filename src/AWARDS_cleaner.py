@@ -15,6 +15,7 @@ def clean_oscars(df: pd.DataFrame) -> pd.DataFrame:
 def clean_razzies(df: pd.DataFrame) -> pd.DataFrame:
     df = df.rename(columns={"Year": "YEAR_CEREMONY"})
     df.columns = df.columns.str.upper()
+    df["WINNER"] = df["WINNER"].str.strip().str.lower().map({'true': True, 'false': False})
     df["YEAR_FILM"] = df["YEAR_CEREMONY"] - 1
     df["AWARD"] = "RAZZIES"
 
