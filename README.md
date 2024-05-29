@@ -20,9 +20,6 @@ Follow these steps to set up the project:
 
    Follow the instructions on the [Poetry documentation](https://python-poetry.org/docs/). It is recommended to install Poetry using `pipx`
 
-> [!NOTE]
-> Using `pipx` to install Poetry ensures it is isolated from your other Python packages and environments.
-
 3. **Install the project dependencies:**
 
     Install the dependencies with the following command:
@@ -43,7 +40,7 @@ Your environment should now be set up and ready for use.
 
 ## Usage
 
-### Extraction (E)
+### **Extraction (E)**
 
 To run the extraction phase, use the following command from the root of the project:
 
@@ -51,19 +48,19 @@ To run the extraction phase, use the following command from the root of the proj
 poetry run python ./src/BOMOJO_scraper.py <option>
 ```
 
-Options:
-- countries
-- franchises
-- brands
+| Option      | Description                                                         |
+|-------------|---------------------------------------------------------------------|
+| countries   | Extracts data about countries. Requires Snowflake ID modification in the code. |
+| franchises  | Extracts data about franchises.                                    |
+| brands      | Extracts data about brands.                                        |
+
 
 > [!CAUTION]
 > For the countries option, the IDs are fetched from Snowflake. You need to modify the code accordingly to ensure it connects to your Snowflake instance.
 
-All extracted files will be saved as CSV files in the `data/raw` directory.
+### **Transformation (T)**
 
-### Transformation (T)
-
-#### Cleaning Scraper Data
+#### **Cleaning Scraper Data**
 
 To clean the data extracted by the scrapers, use the following command from the root of the project:
 
@@ -78,7 +75,7 @@ poetry run python ./src/BOMOJO_cleaner.py <option>
 | `franchises` | Cleans data about franchises.                              |
 | `brands`     | Cleans data about brands.                                  |
 
-#### Cleaning Awards Data
+#### **Cleaning Awards Data**
 The awards data was sourced from Kaggle and placed in the data/raw directory. The sources are:
 
 - [The Oscar Award Dataset](https://www.kaggle.com/datasets/unanimad/the-oscar-award/data)
@@ -90,9 +87,6 @@ To clean the awards data, use the following command from the root of the project
 poetry run python ./src/AWARDS_cleaner.py
 ```
 No additional options are required for this command.
-
-> [!NOTE]
-> All cleaned files will be saved as Parquet files in the `data/processed` directory.
 
 ### Load (L)
 
