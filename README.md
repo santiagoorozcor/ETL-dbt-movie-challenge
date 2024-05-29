@@ -20,8 +20,8 @@ Follow these steps to set up the project:
 
    Follow the instructions on the [Poetry documentation](https://python-poetry.org/docs/). It is recommended to install Poetry using `pipx`
 
-    > [!NOTE]
-    > Using `pipx` to install Poetry ensures it is isolated from your other Python packages and environments.
+> [!NOTE]
+> Using `pipx` to install Poetry ensures it is isolated from your other Python packages and environments.
 
 3. **Install the project dependencies:**
 
