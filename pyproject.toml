@@ -2,7 +2,7 @@
 name = "etl-dbt-movie-challenge"
 version = "0.1.0"
 description = ""
-authors = ["Santiago Orozco <santiago.orozco@prediktia.com>"]
+authors = ["Santiago Orozco"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
